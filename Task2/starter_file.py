@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from mainui import Ui_MainWindow
 import sys
 from scipy.io import wavfile
-from scipy.fftpack import fft,rfft,fftfreq
+from scipy.fftpack import fft,rfft
 import numpy as np
 import pandas as pd
 
@@ -29,14 +29,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.samplerate, self.data = wavfile.read(path)
    
         self.data = self.data[:,0]
-      
+
         # convert gain to db 
-        datafft = fft(self.data)
-        #Get the absolute value of real and complex component:
-        fftabs = abs(datafft)
-      
+        window = np.hanning(1024)
+        self.data = self.data[0:1024] * window
+        #fft 
+        mags = abs(rfft(self.data))
         # convert to dB
-        mags = 20*np.log10(fftabs)
+        mags = 20*np.log10(mags)
         # normalise to 0 dB max
      
         mags -= max(mags)
@@ -109,7 +109,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     #     print(pos)
     #     self.ui.verticalSlider.setMaximum(1+self.p1) 
 
-    
+
 
         
              
