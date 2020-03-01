@@ -9,7 +9,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         super(ApplicationWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.player =  QMediaPlayer(self) 
-        self.ui.setupUi(self)
+        self.ui.setupUi(self) 
         self.ui.play.clicked.connect(self.player.play)
         self.ui.pause.clicked.connect(self.player.pause)
         self.ui.stop.clicked.connect(self.player.stop)
@@ -24,7 +24,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         #         QMediaContent(
         #             self.QUrl.fromLocalFile(filename)
         #         )
-        #     )    
+        #     )                                                                                                                                                                                                                             
 
 
 def main():
