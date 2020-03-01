@@ -13,33 +13,45 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
-
+        self.sliders = [self.ui.verticalSlider,self.ui.verticalSlider_2,self.ui.verticalSlider_3,self.ui.verticalSlider_4,self.ui.verticalSlider_5,self.ui.verticalSlider_6,self.ui.verticalSlider_7,self.ui.verticalSlider_8,self.ui.verticalSlider_9,self.ui.verticalSlider_10]
+        
         self.p1 = 0  
         self.ui.browser.clicked.connect(self.getfiles)
         # self.ui.verticalSlider.valueChanged.connect(self.humming)
-        
+        self.pos = self.ui.verticalSlider.value()
+
 
     def getfiles(self):
-        fileName = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "",
+        path,extention = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "",
             "(*.wav )")
-        self.FFS(fileName)
+        self.Timedomain(path)
+
+    def read_file(self,path):
+        self.samplerate, self.data = wavfile.read(path)
+        self.Timedomain(self.data)
+
+    def Timedomain(self,data):
+        self.ui.graphicsView.plot(data[:,0])
+
+
+
+
+
+
+    
 
     def FFS(self,fn):
-        path = fn[0]
-        self.samplerate, self.data = wavfile.read(path)
-   
+      
         self.data = self.data[:,0]
-
         # convert gain to db 
         window = np.hanning(1024)
         self.data = self.data[0:1024] * window
-        #fft 
+        #fft
         mags = abs(rfft(self.data))
         # convert to dB
         mags = 20*np.log10(mags)
         # normalise to 0 dB max
         mags -= max(mags)
-
         #Get the absolute value of real and complex component:     
         self.samples_length =self.data.shape[0]
         self.freqs = np.fft.fftfreq(self.samples_length,1/self.samplerate)
@@ -51,8 +63,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         
         self.ui.graphicsView.setXRange(0, self.samplerate/2)
-
-        # self.ui.graphicsView.setLogMode(True,None)
        
         self.ui.graphicsView.showGrid(True)
 
@@ -68,15 +78,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
  
         bands =[all_data[i * bandsno:(i + 1) * bandsno] for i in range((len(all_data) + bandsno - 1) // bandsno )]
         self.humming(bands)
-        print(type(bands[0]))
-    
+
     def humming(self,data):
         # print(data)
-        pos = self.ui.verticalSlider.value()
-        data[0] = [int(x) * int(pos) for x in data[0]]
+        data[0] = [int(x) * int(self.pos) for x in data[0]]
+        print(self.pos)
         alldata = [element for sublist in data for element in sublist]
-        print(alldata)
         self.ui.graphicsView.plot(self.freqs[:int(self.freqs.size/2)],alldata[:int(self.freqs.size/2)]) 
+    
+    
 
 
 
@@ -95,7 +105,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     #     print(pos)
     #     self.ui.verticalSlider.setMaximum(1+self.p1) 
-
 
 
         
