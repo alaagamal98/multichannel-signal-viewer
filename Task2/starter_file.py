@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from mainwindow import Ui_MainWindow
+from mainui import Ui_MainWindow
 import sys
 from scipy.io import wavfile
 from scipy.fftpack import fft,rfft,fftfreq
@@ -12,11 +12,11 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         super(ApplicationWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        
-
         self.p1 = 0  
         self.ui.browser.clicked.connect(self.getfiles)
-        # self.ui.verticalSlider.valueChanged.connect(self.humming)
+        self.ui.verticalSlider.valueChanged.connect(self.humming)
+     
+        
         
 
     def getfiles(self):
@@ -38,6 +38,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         # convert to dB
         mags = 20*np.log10(fftabs)
         # normalise to 0 dB max
+     
         mags -= max(mags)
 
         #Get the absolute value of real and complex component:     
@@ -58,25 +59,37 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
        
         self.ui.graphicsView.plot(freqs[:int(freqs.size/2)],mags[:int(freqs.size/2)])
-
-        self.divideTo10bands(mags[:int(freqs.size/2)])
+        self.all_data = mags[:int(freqs.size/2)]
+        self.divideTo10bands()
 
     
 
-    def divideTo10bands(self,all_data):
-        bandsno = int(0.1 * all_data.size * 0.5)
+    def divideTo10bands(self):
+        
+        bandsno = int(0.1 * self.all_data.size * 0.5)
  
-        bands =[all_data[i * bandsno:(i + 1) * bandsno] for i in range((len(all_data) + bandsno - 1) // bandsno )]
-        self.humming(bands)
-        print(type(bands[0]))
+        bands =[self.all_data[i * bandsno:(i + 1) * bandsno] for i in range((len(self.all_data) + bandsno - 1) // bandsno )]
+        return(bands)
+        # print(type(bands[0]))
     
-    def humming(self,data):
-        # print(data)
-        pos = self.ui.verticalSlider.value()
-        data[0] = [int(x) * int(pos) for x in data[0]]
+    def humming(self):
+        data = self.divideTo10bands()
+        self.pos = self.ui.verticalSlider.value()
+               
+        data[0] = [int(x) * int(self.pos) for x in data[0]]
         alldata = [element for sublist in data for element in sublist]
-        print(alldata)
-        self.ui.graphicsView.plot(self.freqs[:int(self.freqs.size/2)],alldata[:int(self.freqs.size/2)]) 
+         # convert to dB
+        mags = 20*np.log10(alldata)
+        # normalise to 0 dB max
+        mags -= max(mags)
+        self.ui.graphicsView_2.setXRange(0, self.samplerate/2)
+
+        # self.ui.graphicsView.setLogMode(True,None)
+       
+        self.ui.graphicsView_2.showGrid(True)
+
+        self.ui.graphicsView_2.plot(self.freqs[:int(self.freqs.size/2)],mags[:int(self.freqs.size/2)]) 
+
 
 
 
