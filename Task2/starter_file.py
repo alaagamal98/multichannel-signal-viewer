@@ -12,13 +12,11 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         super(ApplicationWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        # self.ui.label.setMaximum(3)
-        # self.ui.label.setMinimum(-3
-        # )
+        
 
         self.p1 = 0  
         self.ui.browser.clicked.connect(self.getfiles)
-        self.ui.verticalSlider.valueChanged.connect(self.sliders)
+        # self.ui.verticalSlider.valueChanged.connect(self.humming)
         
 
     def getfiles(self):
@@ -61,30 +59,42 @@ class ApplicationWindow(QtWidgets.QMainWindow):
        
         self.ui.graphicsView.plot(freqs[:int(freqs.size/2)],mags[:int(freqs.size/2)])
 
-        self.sortData(freqs[:int(freqs.size/2)],mags[:int(freqs.size/2)])
+        self.divideTo10bands(mags[:int(freqs.size/2)])
 
     
-    def sortData(self,freqs,mags):
-        self.all_data = pd.DataFrame(list(zip(freqs, mags)),columns =['freqs', 'mags'])
-        print(self.all_data)
-        # self.all_data = self.all_data.sort_values(axis=0)
-        
 
     def divideTo10bands(self,all_data):
-        bandsno = 10
+        bandsno = int(0.1 * all_data.size * 0.5)
  
-        self.bands = pd.DataFrame([all_data[i * bandsno:(i + 1) * bandsno] for i in range((len(all_data) + bandsno - 1) // bandsno )])
-        return(self.bands)
+        bands =[all_data[i * bandsno:(i + 1) * bandsno] for i in range((len(all_data) + bandsno - 1) // bandsno )]
+        self.humming(bands)
+        print(type(bands[0]))
     
-    def sliders(self):
-        self.bands = self.divideTo10bands(self.all_data)
+    def humming(self,data):
+        # print(data)
         pos = self.ui.verticalSlider.value()
-        self.bands[1][0] = [x + pos for x in self.bands[1][0]]
+        data[0] = [int(x) * int(pos) for x in data[0]]
+        alldata = [element for sublist in data for element in sublist]
+        print(alldata)
+        self.ui.graphicsView.plot(self.freqs[:int(self.freqs.size/2)],alldata[:int(self.freqs.size/2)]) 
 
-        self.ui.graphicsView.plot(self.bands.iloc[0][:int(self.freqs.size/2)],self.bands.iloc[1][:int(self.freqs.size/2)]) 
 
-        print(pos)
-        self.ui.verticalSlider.setMaximum(1+self.p1) 
+
+
+
+
+
+
+    
+    # def sliders(self):
+    #     self.bands = self.divideTo10bands(self.all_data)
+    #     pos = self.ui.verticalSlider.value()
+    #     self.bands[1][0] = [x + pos for x in self.bands[1][0]]
+
+    #     self.ui.graphicsView.plot(self.bands.iloc[0][:int(self.freqs.size/2)],self.bands.iloc[1][:int(self.freqs.size/2)]) 
+
+    #     print(pos)
+    #     self.ui.verticalSlider.setMaximum(1+self.p1) 
 
 
 
