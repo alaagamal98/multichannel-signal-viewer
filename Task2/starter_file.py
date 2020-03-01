@@ -75,13 +75,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def humming(self):
         data = self.divideTo10bands()
         self.pos = self.ui.verticalSlider.value()
-               
-        data[0] = [int(x) * int(self.pos) for x in data[0]]
-        alldata = [element for sublist in data for element in sublist]
+        hamm = np.hamming(self.all_data.size)
+        # # data[0] = [int(x) * int(self.pos) for x in data[0]]
+        # alldata = [element for sublist in data for element in sublist]
          # convert to dB
-        mags = 20*np.log10(alldata)
+        mags = 20*np.log10(data)
         # normalise to 0 dB max
         mags -= max(mags)
+
         self.ui.graphicsView_2.setXRange(0, self.samplerate/2)
 
         # self.ui.graphicsView.setLogMode(True,None)
